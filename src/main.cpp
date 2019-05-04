@@ -6,12 +6,15 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
+#include <SPIFFS.h>
 
 #include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/FreeSansBold9pt7b.h>
 
 #include "pinout.h"
 #include "secrets.h"
+
+#define FILESYSTEM SPIFFS
 
 GxIO_Class io(SPI, ELINK_SS, ELINK_DC, ELINK_RESET);
 GxEPD_Class display(io, ELINK_RESET, ELINK_BUSY);
@@ -53,6 +56,8 @@ void startServer()
   {
     Serial.println("MDNS responder started");
   }
+
+  server.serveStatic("/", FILESYSTEM, "/").setDefaultFile("index.html");
 
   server.on("/message", HTTP_POST, [](AsyncWebServerRequest *request) {
     for (int i = 0; i < request->params(); i++)
@@ -134,6 +139,16 @@ void setup()
 {
   Serial.begin(115200);
   delay(500);
+
+  if (!FILESYSTEM.begin())
+  {
+    Serial.println("FILESYSTEM is not database");
+    Serial.println("Please use Arduino ESP32 Sketch data Upload files");
+    while (1)
+    {
+      delay(1000);
+    }
+  }
 
   // init display
   display.init();

@@ -49,10 +49,9 @@
       formData.append("width", width);
       formData.append("height", height);
 
-      fetch("http://192.168.1.188/pixels", {
+      fetch("/pixels", {
         method: "POST",
-        body: formData,
-        mode: "no-cors"
+        body: formData
       });
     }
   </script>
