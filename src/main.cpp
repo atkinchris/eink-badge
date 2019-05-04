@@ -75,6 +75,46 @@ void startServer()
     request->send(200, "text/plain", message);
   });
 
+  server.on("/data", HTTP_POST, [](AsyncWebServerRequest *request) {
+    if (
+        !(
+            request->hasParam("data", true) &&
+            request->hasParam("width", true) &&
+            request->hasParam("height", true) &&
+            request->hasParam("x", true) &&
+            request->hasParam("y", true)))
+    {
+      request->send(400, "text/plain", "Invalid params");
+      return;
+    }
+
+    try
+    {
+      String data = request->getParam("data", true)->value();
+      int width = request->getParam("width", true)->value().toInt();
+      int height = request->getParam("height", true)->value().toInt();
+      int x = request->getParam("x", true)->value().toInt();
+      int y = request->getParam("y", true)->value().toInt();
+
+      for (size_t iY = 0; iY < height; iY++)
+      {
+        for (size_t iX = 0; iX < width; iX++)
+        {
+          uint16_t color = data.charAt((iY * width) + iX) == '0' ? GxEPD_WHITE : GxEPD_BLACK;
+          display.drawPixel(x + iX, y + iY, color);
+        }
+      }
+
+      display.update();
+
+      request->send(200);
+    }
+    catch (...)
+    {
+      request->send(500);
+    }
+  });
+
   server.onNotFound([](AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
   });
