@@ -75,7 +75,7 @@ void startServer()
     request->send(200, "text/plain", message);
   });
 
-  server.on("/data", HTTP_POST, [](AsyncWebServerRequest *request) {
+  server.on("/pixels", HTTP_POST, [](AsyncWebServerRequest *request) {
     if (
         !(
             request->hasParam("data", true) &&
@@ -96,11 +96,17 @@ void startServer()
       int x = request->getParam("x", true)->value().toInt();
       int y = request->getParam("y", true)->value().toInt();
 
+      if (x * y > data.length())
+      {
+        request->send(400, "text/plain", "Data size mismatch");
+        return;
+      }
+
       for (size_t iY = 0; iY < height; iY++)
       {
         for (size_t iX = 0; iX < width; iX++)
         {
-          uint16_t color = data.charAt((iY * width) + iX) == '0' ? GxEPD_WHITE : GxEPD_BLACK;
+          uint16_t color = data.charAt((iY * width) + iX) == '1' ? GxEPD_BLACK : GxEPD_WHITE;
           display.drawPixel(x + iX, y + iY, color);
         }
       }
