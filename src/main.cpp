@@ -11,9 +11,7 @@
 #include <Fonts/FreeSansBold9pt7b.h>
 
 #include "pinout.h"
-
-#define WIFI_SSID ""
-#define WIFI_PASSWORD ""
+#include "secrets.h"
 
 GxIO_Class io(SPI, ELINK_SS, ELINK_DC, ELINK_RESET);
 GxEPD_Class display(io, ELINK_RESET, ELINK_BUSY);
