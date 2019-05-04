@@ -1,0 +1,6 @@
+{
+  "terminal.integrated.env.osx": {
+    "PATH": "/Users/chris/.platformio/penv/bin:/Users/chris/.platformio/penv:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/chris/.nvm/versions/node/v10.15.2/bin:/Users/chris/bin:/Users/chris/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Wireshark.app/Contents/MacOS:/Users/chris/Library/Android/sdk/emulator:/Users/chris/Library/Android/sdk/tools:/Users/chris/Library/Android/sdk/tools/bin:/Users/chris/Library/Android/sdk/platform-tools:/usr/local/opt/fzf/bin",
+    "PLATFORMIO_CALLER": "vscode"
+  }
+}
