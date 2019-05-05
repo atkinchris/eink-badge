@@ -7,3 +7,6 @@
 .vscode/ipch
 
 include/secrets.h
+
+node_modules
+data
