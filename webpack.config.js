@@ -63,15 +63,6 @@ const production = {
       },
     }),
   ],
-  optimization: {
-    minimizer: [
-      new UglifyJsPlugin({
-        cache: true,
-        parallel: true,
-        sourceMap: true,
-      }),
-    ],
-  },
   devtool: false,
 }
 

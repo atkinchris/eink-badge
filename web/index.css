@@ -1,0 +1,27 @@
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #eeeeee;
+  font-size: 22px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  height: 100%;
+  width: 100%;
+}
+
+#canvas {
+  margin: 1rem;
+}
+
+#go-button {
+  font-size: 1rem;
+}
