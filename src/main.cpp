@@ -12,7 +12,6 @@
 #include <Fonts/FreeSansBold9pt7b.h>
 
 #include "pinout.h"
-#include "secrets.h"
 
 #define FILESYSTEM SPIFFS
 
@@ -21,7 +20,11 @@ GxEPD_Class display(io, ELINK_RESET, ELINK_BUSY);
 AsyncWebServer server(80);
 char message[32];
 
-void printTextToString(String text, const GFXfont *font)
+bool serverStarted = false;
+int buttonState = 0;
+int lastButtonState = 0;
+
+void printTextToString(String text, const GFXfont *font = &FreeMono9pt7b)
 {
   int16_t x1, y1;
   uint16_t w, h;
@@ -32,22 +35,6 @@ void printTextToString(String text, const GFXfont *font)
   display.setCursor(display.width() / 2 - ((w + x1) / 2), display.height() / 2 - ((h + y1) / 2));
   display.println(text);
   display.update();
-}
-
-void connectToWifi()
-{
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  while (WiFi.waitForConnectResult() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    esp_restart();
-  }
-
-  Serial.println(F("WiFi connected"));
-  Serial.println(WiFi.localIP());
-  printTextToString(WiFi.localIP().toString(), &FreeMono9pt7b);
 }
 
 void startAP()
@@ -61,18 +48,28 @@ void startAP()
   if (!WiFi.softAP(apName.c_str(), NULL, 1, 0, 1))
   {
     Serial.println("AP Config failed.");
-    printTextToString("AP Config failed.", &FreeMono9pt7b);
+    printTextToString("AP Config failed.");
     return;
   }
   else
   {
     Serial.println("AP Config Success.");
-    printTextToString(apName, &FreeMono9pt7b);
+    printTextToString("Connect to: " + apName);
   }
 }
 
 void startServer()
 {
+  if (!FILESYSTEM.begin())
+  {
+    Serial.println("FILESYSTEM is not database");
+    Serial.println("Please use Arduino ESP32 Sketch data Upload files");
+    while (1)
+    {
+      delay(1000);
+    }
+  }
+
   if (MDNS.begin("ttgo"))
   {
     Serial.println("MDNS responder started");
@@ -163,38 +160,23 @@ void setup()
 
   pinMode(BUTTON_3, INPUT);
 
-  if (!FILESYSTEM.begin())
-  {
-    Serial.println("FILESYSTEM is not database");
-    Serial.println("Please use Arduino ESP32 Sketch data Upload files");
-    while (1)
-    {
-      delay(1000);
-    }
-  }
-
   // init display
   display.init();
   display.setTextColor(GxEPD_BLACK);
   display.setFont(&FreeMono9pt7b);
   display.setRotation(1);
   display.setTextSize(1);
-
-  if (digitalRead(BUTTON_3) == LOW)
-  {
-    connectToWifi();
-  }
-  else
-  {
-    startAP();
-  }
-
-  startServer();
 }
-
-int buttonState = 0;
 
 void loop()
 {
-  delay(1000);
+  buttonState = digitalRead(BUTTON_3);
+  if (!serverStarted && (buttonState != lastButtonState) && buttonState == LOW)
+  {
+    startAP();
+    startServer();
+    serverStarted = true;
+    delay(50);
+  }
+  lastButtonState = buttonState;
 }
