@@ -70,7 +70,7 @@ void startServer()
     }
   }
 
-  if (MDNS.begin("ttgo"))
+  if (MDNS.begin("badge"))
   {
     Serial.println("MDNS responder started");
   }
