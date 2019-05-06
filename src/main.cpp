@@ -21,7 +21,20 @@ GxEPD_Class display(io, ELINK_RESET, ELINK_BUSY);
 AsyncWebServer server(80);
 char message[32];
 
-String connectToWifi()
+void printTextToString(String text, const GFXfont *font)
+{
+  int16_t x1, y1;
+  uint16_t w, h;
+
+  display.setFont(font);
+  display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
+  display.drawRect(x1, y1, w, h, GxEPD_WHITE);
+  display.setCursor(display.width() / 2 - ((w + x1) / 2), display.height() / 2 - ((h + y1) / 2));
+  display.println(text);
+  display.update();
+}
+
+void connectToWifi()
 {
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -34,20 +47,28 @@ String connectToWifi()
 
   Serial.println(F("WiFi connected"));
   Serial.println(WiFi.localIP());
-  return WiFi.localIP().toString();
+  printTextToString(WiFi.localIP().toString(), &FreeMono9pt7b);
 }
 
-void printTextToString(String text, const GFXfont *font)
+void startAP()
 {
-  int16_t x1, y1;
-  uint16_t w, h;
+  String apName = "BadgeAP";
+  IPAddress apIP = IPAddress(192, 168, 1, 1);
 
-  display.setFont(font);
-  display.fillScreen(GxEPD_WHITE);
-  display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
-  display.setCursor(display.width() / 2 - ((w + x1) / 2), display.height() / 2 - ((h + y1) / 2));
-  display.println(text);
-  display.update();
+  WiFi.mode(WIFI_AP);
+  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+
+  if (!WiFi.softAP(apName.c_str(), NULL, 1, 0, 1))
+  {
+    Serial.println("AP Config failed.");
+    printTextToString("AP Config failed.", &FreeMono9pt7b);
+    return;
+  }
+  else
+  {
+    Serial.println("AP Config Success.");
+    printTextToString(apName, &FreeMono9pt7b);
+  }
 }
 
 void startServer()
@@ -140,6 +161,8 @@ void setup()
   Serial.begin(115200);
   delay(500);
 
+  pinMode(BUTTON_3, INPUT);
+
   if (!FILESYSTEM.begin())
   {
     Serial.println("FILESYSTEM is not database");
@@ -152,17 +175,24 @@ void setup()
 
   // init display
   display.init();
-  display.eraseDisplay();
   display.setTextColor(GxEPD_BLACK);
   display.setFont(&FreeMono9pt7b);
   display.setRotation(1);
   display.setTextSize(1);
 
-  String ipAddress = connectToWifi();
-  startServer();
+  if (digitalRead(BUTTON_3) == LOW)
+  {
+    connectToWifi();
+  }
+  else
+  {
+    startAP();
+  }
 
-  printTextToString(ipAddress, &FreeMono9pt7b);
+  startServer();
 }
+
+int buttonState = 0;
 
 void loop()
 {
